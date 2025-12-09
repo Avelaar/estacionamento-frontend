@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
+import { loginUsuario } from "@/api/UsuarioAPI";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,21 +14,31 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Simulação de login - você implementará a integração com Java posteriormente
-    if (email && password) {
-      toast({
-        title: "Login realizado!",
-        description: "Redirecionando para o dashboard...",
-      });
-      setTimeout(() => navigate("/dashboard"), 1000);
-    } else {
+
+    try {
+      const usuario = await loginUsuario({ email, password });
+
+      if (usuario) {
+        toast({
+          title: "Login realizado!",
+          description: "Redirecionando para o dashboard...",
+        });
+
+        setTimeout(() => navigate("/dashboard"), 1000);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Credenciais inválidas",
+          description: "Verifique seu email e senha.",
+        });
+      }
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erro no login",
-        description: "Por favor, preencha todos os campos.",
+        description: "Não foi possível conectar ao servidor.",
       });
     }
   };
